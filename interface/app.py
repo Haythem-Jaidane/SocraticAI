@@ -17,18 +17,6 @@ st.set_page_config(
 st.title("🧠 Learning Assistant")
 st.write("Ask any question and get clear, structured explanations.")
 
-"""query = st.text_input("Enter topic or paper query:")
-if st.button("Search") and query:
-    with st.spinner("Fetching and summarizing..."):
-        try:
-            response = agent_executor2.invoke({"input": "Summarize the latest ArXiv papers on transformers in NLP"})
-            raw_output = response.get("output")
-            output_text = raw_output[0]["text"] + raw_output[1]  # adjust depending on structure
-
-            st.markdown(f"<div>{output_text}</div>", unsafe_allow_html=True)
-        except Exception as e:
-            st.error(f"Error: {e}")"""
-
 # Input and button
 col1, col2 = st.columns([4, 1])
 with col1:
