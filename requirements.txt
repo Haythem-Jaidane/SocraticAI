@@ -6,3 +6,4 @@ langchain-google-genai
 langchain-classic
 duckduckpy
 ddgs
+arxiv
