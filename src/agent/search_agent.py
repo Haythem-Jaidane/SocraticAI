@@ -2,6 +2,20 @@ from langchain_classic.agents import create_tool_calling_agent,AgentExecutor
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_classic.memory import ConversationBufferWindowMemory
 from ..utils.search_tool import tools
+import os
+from dotenv import load_dotenv
+from langchain_google_genai import ChatGoogleGenerativeAI
+
+load_dotenv()
+
+
+llm = ChatGoogleGenerativeAI(
+    model="gemini-2.5-flash",
+    temperature=0,
+    max_retries=6,
+    timeout=60,
+    google_api_key=os.getenv("GOOGLE_API_KEY")
+)
 
 memory = ConversationBufferWindowMemory(
     k=3, 
