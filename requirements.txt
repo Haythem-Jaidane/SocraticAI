@@ -1,0 +1,8 @@
+# Core LangChain Framework
+langchain>=1.2.10
+langchain-core
+langchain-community
+langchain-google-genai
+langchain-classic
+duckduckpy
+ddgs
