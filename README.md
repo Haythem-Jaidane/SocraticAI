@@ -15,6 +15,10 @@ The Learning Assistant is an AI-powered chatbot designed to help users learn and
 *   **User-Friendly Interface:** A clean and intuitive interface built with Streamlit.
 *   **Dark/Light Mode:** Adapts to your system's theme for a comfortable viewing experience.
 
+## Demo
+
+You can try out a live demo of the Learning Assistant here: [SocraticAI Test App](http://socraticai-test.streamlit.app/)
+
 ## How to Get Started
 
 1.  **Clone the repository:**
