@@ -1,40 +1,47 @@
 import streamlit as st
-import sys
 import os
+import streamlit.components.v1 as components
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-from src.agent.search_agent import prompt,agent_executor
-from src.agent.scientific_reacher import agent_executor2
-
-# Page config
 st.set_page_config(
     page_title="Learning Assistant",
+    page_icon="🧠",
     layout="wide"
 )
 
-# Title & description
-st.title("🧠 Learning Assistant")
-st.write("Ask any question and get clear, structured explanations.")
+# ============================================================
+# Detect Dark / Light Mode
+# ============================================================
+theme_detector = components.html(
+    """
+    <script>
+    const theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? "dark" : "light";
+    window.parent.postMessage({theme: theme}, "*");
+    </script>
+    """,
+    height=0,
+)
 
-# Input and button
-col1, col2 = st.columns([4, 1])
-with col1:
-    query = st.text_input("Enter your question or topic:", placeholder="e.g. How does a transformer model work?")
-with col2:
-    # No extra st.write needed if using margin-top in CSS
-    ask_btn = st.button("Ask")
-# Display results
-if ask_btn and query:
-    with st.spinner("Thinking..."):
-        try:
-            response = agent_executor.invoke({"input": query})
-            raw_output = response.get("output")
+if "theme_mode" not in st.session_state:
+    st.session_state.theme_mode = "light"
 
-            output_text = raw_output[0]["text"] + raw_output[1]
+# Fallback (Streamlit doesn’t always catch postMessage immediately)
+if st.get_option("theme.base") == "dark":
+    st.session_state.theme_mode = "dark"
+else:
+    st.session_state.theme_mode = "light"
 
-            # --- Display in your CSS Box ---
-            st.markdown(f"<div class='output-box'>{output_text}</div>", unsafe_allow_html=True)
 
-        except Exception as e:
-            st.error(f"Error: {e}")
+# ============================================================
+# Sidebar
+# ============================================================
+with st.sidebar:
+
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+    if st.session_state.theme_mode == "dark":
+        logo_path = os.path.join(BASE_DIR, "public", "logo.png")
+    else:
+        logo_path = os.path.join(BASE_DIR, "public", "logo_dark.png")
+
+    if os.path.exists(logo_path):
+        st.image(logo_path, use_container_width=True)

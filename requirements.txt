@@ -7,3 +7,4 @@ langchain-classic
 duckduckpy
 ddgs
 arxiv
+streamlit
