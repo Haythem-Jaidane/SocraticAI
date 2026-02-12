@@ -1,6 +1,8 @@
 # 🧠 Learning Assistant
 
-![Learning Assistant Logo](./interface/public/logo.png)
+<p align="center">
+  <img src="./interface/public/logo.png" alt="Learning Assistant Logo">
+</p>
 
 ## Introduction
 
