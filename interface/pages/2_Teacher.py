@@ -3,6 +3,12 @@ import sys
 import os
 import streamlit.components.v1 as components
 
+st.sidebar.page_link('pages/1_Dashboard.py', label='Dashboard')
+st.sidebar.page_link('pages/2_Teacher.py', label='Teacher')
+
+if 'user' not in st.session_state or not st.session_state.user:
+    st.switch_page("app.py")
+
 # ---- Path fix ----
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
@@ -42,13 +48,17 @@ with st.sidebar:
 
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-    if st.session_state.theme_mode == "dark":
+    if st.session_state.get("theme_mode", "light") == "dark":
         logo_path = os.path.join(BASE_DIR, "public", "logo.png")
     else:
         logo_path = os.path.join(BASE_DIR, "public", "logo_dark.png")
 
     if os.path.exists(logo_path):
         st.image(logo_path, use_container_width=True)
+    
+    if st.button("Logout"):
+        st.session_state.user = False
+        st.rerun()
 
 
 if "messages" not in st.session_state:

@@ -1,47 +1,40 @@
-import streamlit as st
 import os
-import streamlit.components.v1 as components
+import requests
+import streamlit as st
+from dotenv import load_dotenv
 
-st.set_page_config(
-    page_title="Learning Assistant",
-    page_icon="🧠",
-    layout="wide"
-)
+load_dotenv()
 
-# ============================================================
-# Detect Dark / Light Mode
-# ============================================================
-theme_detector = components.html(
-    """
-    <script>
-    const theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? "dark" : "light";
-    window.parent.postMessage({theme: theme}, "*");
-    </script>
-    """,
-    height=0,
-)
+FIREBASE_CONFIG = {
+    "apiKey": os.getenv("FIREBASE_API_KEY"),
+    "authDomain": os.getenv("FIREBASE_AUTH_DOMAIN"),
+}
 
-if "theme_mode" not in st.session_state:
-    st.session_state.theme_mode = "light"
+# 2. Authentication Helper Functions
+def firebase_login(email, password):
+    url = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={FIREBASE_CONFIG['apiKey']}"
+    payload = {"email": email, "password": password, "returnSecureToken": True}
+    response = requests.post(url, json=payload)
+    return response.json()
 
-# Fallback (Streamlit doesn’t always catch postMessage immediately)
-if st.get_option("theme.base") == "dark":
-    st.session_state.theme_mode = "dark"
+if "user" not in st.session_state:
+    st.session_state.user = None
+
+# --- UI LOGIC ---
+if st.session_state.user:
+    st.success(f"Welcome back, {st.session_state.user['email']}!")
+    if st.button("Logout"):
+        st.session_state.user = None
+        st.rerun()
 else:
-    st.session_state.theme_mode = "light"
 
-
-# ============================================================
-# Sidebar
-# ============================================================
-with st.sidebar:
-
-    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
-    if st.session_state.theme_mode == "dark":
-        logo_path = os.path.join(BASE_DIR, "public", "logo.png")
-    else:
-        logo_path = os.path.join(BASE_DIR, "public", "logo_dark.png")
-
-    if os.path.exists(logo_path):
-        st.image(logo_path, use_container_width=True)
+    email = st.text_input("Email", key="login_email")
+    password = st.text_input("Password", type="password", key="login_pass")
+    if st.button("Login"):
+        res = firebase_login(email, password)
+        if "idToken" in res:
+            st.session_state.user = res
+            st.switch_page("pages/1_Dashboard.py")
+            st.experimental_rerun()
+        else:
+            st.error(res.get("error", {}).get("message", "Login failed"))

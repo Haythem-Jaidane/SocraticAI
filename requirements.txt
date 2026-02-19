@@ -8,3 +8,4 @@ duckduckpy
 ddgs
 arxiv
 streamlit
+plotly
