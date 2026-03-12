@@ -5,6 +5,9 @@ import streamlit.components.v1 as components
 
 st.sidebar.page_link('pages/1_Dashboard.py', label='Dashboard')
 st.sidebar.page_link('pages/2_Teacher.py', label='Teacher')
+st.sidebar.page_link('pages/3_Roadmap.py', label='Roadmap Builder')
+st.sidebar.page_link('pages/Quiz.py', label='Quiz')
+st.sidebar.page_link('pages/News.py', label='News')
 
 if 'user' not in st.session_state or not st.session_state.user:
     st.switch_page("app.py")
@@ -54,7 +57,7 @@ with st.sidebar:
         logo_path = os.path.join(BASE_DIR, "public", "logo_dark.png")
 
     if os.path.exists(logo_path):
-        st.image(logo_path, use_container_width=True)
+        st.image(logo_path, width=True)
     
     if st.button("Logout"):
         st.session_state.user = False
