@@ -1,12 +1,13 @@
 import firebase_admin
 from firebase_admin import credentials, firestore
 import os
-import streamlit as st
 
 def init_firebase():
     """Initializes Firebase Admin SDK and returns the Firestore client."""
     if not firebase_admin._apps:
-        cred = credentials.Certificate(st.secrets["FIREBASE_KEY"])
+        # Use absolute path for service account key
+        cred_dict = dict(st.secrets["FIREBASE_KEY"])
+        cred = credentials.Certificate(cred_dict)
         firebase_admin.initialize_app(cred)
     
     return firebase_admin.get_app(), firestore.client()
