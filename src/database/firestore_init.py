@@ -6,13 +6,6 @@ import streamlit as st
 def init_firebase():
     """Initializes Firebase Admin SDK and returns the Firestore client."""
     if not firebase_admin._apps:
-        # Use absolute path for service account key
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-        cred_path = os.path.join(base_dir, '../../socraticai.json')
-        
-        if not os.path.exists(cred_path):
-            raise FileNotFoundError(f"Firebase credentials not found at {cred_path}")
-            
         cred = credentials.Certificate(st.secrets["FIREBASE_KEY"])
         firebase_admin.initialize_app(cred)
     
