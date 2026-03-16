@@ -1,6 +1,7 @@
 import firebase_admin
 from firebase_admin import credentials, firestore
 import os
+import streamlit as st
 
 def init_firebase():
     """Initializes Firebase Admin SDK and returns the Firestore client."""
@@ -12,7 +13,7 @@ def init_firebase():
         if not os.path.exists(cred_path):
             raise FileNotFoundError(f"Firebase credentials not found at {cred_path}")
             
-        cred = credentials.Certificate(cred_path)
+        cred = credentials.Certificate(st.secrets["FIREBASE_KEY"])
         firebase_admin.initialize_app(cred)
     
     return firebase_admin.get_app(), firestore.client()
