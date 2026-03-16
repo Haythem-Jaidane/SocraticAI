@@ -10,8 +10,10 @@ st.set_page_config(page_title="Industry News", page_icon="📰")
 st.sidebar.page_link('pages/1_Dashboard.py', label='Dashboard')
 st.sidebar.page_link('pages/2_Teacher.py', label='Teacher')
 st.sidebar.page_link('pages/3_Roadmap.py', label='Roadmap Builder')
-st.sidebar.page_link('pages/Quiz.py', label='Quiz')
-st.sidebar.page_link('pages/News.py', label='News')
+st.sidebar.page_link('pages/5_Quiz.py', label='Quick Quiz')
+st.sidebar.page_link('pages/Assesement.py', label='Full Assessment')
+st.sidebar.page_link('pages/4_News.py', label='News')
+
 
 if 'user' not in st.session_state or not st.session_state.user:
     st.switch_page("app.py")

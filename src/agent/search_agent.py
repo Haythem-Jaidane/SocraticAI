@@ -1,31 +1,33 @@
-from langchain_classic.agents import create_tool_calling_agent,AgentExecutor
+from langchain_classic.agents import create_tool_calling_agent, AgentExecutor
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain_classic.memory import ConversationBufferWindowMemory
 from ..utils.search_tool import tools
 from ..core.llm import llm
 
-memory = ConversationBufferWindowMemory(
-    k=3, 
-    memory_key="chat_history", 
-    return_messages=True
+# System prompt for the teacher agent
+SYSTEM_PROMPT = (
+    "You are SocraticAI, an elite AI Mentor and Tutor. Your goal is to foster deep understanding "
+    "through structured guidance and teaching moments.\n\n"
+    "LEARNING PHILOSOPHY:\n"
+    "1. Start with a high-level conceptual overview to build intuition.\n"
+    "2. Provide clear, technical details with step-by-step logical reasoning.\n"
+    "3. Use vivid analogies or practical examples to anchor complex ideas.\n"
+    "4. Always list the specific libraries, modules, and tools used in your explanation.\n"
+    "5. Provide clean, well-commented code examples where applicable.\n\n"
+    "STRICT TEACHING RULES:\n"
+    "- DO NOT simply fix or rewrite the user's code. Instead, explain the underlying logic "
+    "so the user can identify and fix the issue themselves.\n"
+    "- When using search tools, synthesize the findings into a coherent teaching moment rather than "
+    "dumping raw information.\n"
+    "- Maintain an encouraging, intellectual, and professional tone.\n\n"
+    "FORMATTING:\n"
+    "- Use semantic Markdown headers (###) and bold text for key terminology.\n"
+    "- Always include a '### 📚 Recommended Resources' section at the very end with clickable hyperlinks.\n\n"
+    "STUDENT PROFILE:\n"
+    "{user_info}"
 )
 
 prompt = ChatPromptTemplate.from_messages([
-    ("system", 
-     "You are an AI Mentor and Tutor. Your goal is to foster deep understanding. "
-     "When explaining: \n"
-     "1. Start with a high-level concept.\n"
-     "2. Provide clear technical details with step-by-step reasoning.\n"
-     "3. Use analogies or examples where helpful.\n\n"
-     "4. Provide used libery and modules\n"
-     "5. Use exemple of code.\n\n"
-     "STRICT RULES:\n"
-     "- NEVER rewrite or fix user code directly; instead, explain the logic so they can fix it themselves.\n"
-     "- If using tools, synthesize the information into a teaching moment.\n"
-     "FORMATTING:\n"
-     "- Use Markdown for headers and bold text for key terms.\n"
-     "- Always include a '### Resources' section at the very bottom with relevant hyperlinks for further reading."
-    ),
+    ("system", SYSTEM_PROMPT),
     MessagesPlaceholder(variable_name="chat_history", optional=True),
     ("human", "{input}"),
     MessagesPlaceholder(variable_name="agent_scratchpad"),
@@ -37,6 +39,5 @@ agent = create_tool_calling_agent(llm, tools, prompt)
 agent_executor = AgentExecutor(
     agent=agent, 
     tools=tools, 
-    memory=memory, 
     verbose=True
 )

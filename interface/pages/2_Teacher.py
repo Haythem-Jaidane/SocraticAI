@@ -6,8 +6,10 @@ import streamlit.components.v1 as components
 st.sidebar.page_link('pages/1_Dashboard.py', label='Dashboard')
 st.sidebar.page_link('pages/2_Teacher.py', label='Teacher')
 st.sidebar.page_link('pages/3_Roadmap.py', label='Roadmap Builder')
-st.sidebar.page_link('pages/Quiz.py', label='Quiz')
-st.sidebar.page_link('pages/News.py', label='News')
+st.sidebar.page_link('pages/5_Quiz.py', label='Quick Quiz')
+st.sidebar.page_link('pages/Assesement.py', label='Full Assessment')
+st.sidebar.page_link('pages/4_News.py', label='News')
+
 
 if 'user' not in st.session_state or not st.session_state.user:
     st.switch_page("app.py")
@@ -17,6 +19,8 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")
 
 from src.agent.search_agent import agent_executor
 from src.agent.scientific_reacher import agent_executor2
+from src.database.database_qu import get_user_data
+from langchain_core.messages import HumanMessage, AIMessage
 
 
 st.title("Learning Assistant Chat")
@@ -82,15 +86,38 @@ if prompt:
     with st.chat_message("assistant"):
         with st.spinner("Thinking..."):
             try:
-                result = agent_executor.invoke({"input": prompt})
+                # Fetch user profile for personalization
+                uid = st.session_state.user.get("localId")
+                user_profile = get_user_data(uid)
+                
+                user_info_str = "Not specified"
+                if user_profile:
+                    skills = str(user_profile.get("skills", []))
+                    goal = user_profile.get("goal", "Not specified")
+                    occupation = user_profile.get("occupation", "Not specified")
+                    user_info_str = f"Skills: {skills}\nGoal: {goal}\nOccupation: {occupation}"
 
-                # ---- Robust output extraction ----
+                # Manually format chat history (last 6 messages for k=3 window)
+                chat_history = []
+                for msg in st.session_state.messages[-6:]:
+                    if msg["role"] == "user":
+                        chat_history.append(HumanMessage(content=msg["content"]))
+                    elif msg["role"] == "assistant":
+                        chat_history.append(AIMessage(content=msg["content"]))
+
+                result = agent_executor.invoke({
+                    "input": prompt, 
+                    "user_info": user_info_str,
+                    "chat_history": chat_history
+                })
+
                 if isinstance(result, dict):
                     output_text = result.get("output", str(result))
                 else:
                     output_text = str(result)
 
                 raw_output = output_text[0]["text"] + output_text[1]
+
 
                 st.markdown(raw_output)
 

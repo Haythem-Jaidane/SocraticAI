@@ -1,30 +1,32 @@
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.prompts import ChatPromptTemplate
 
-def build_dynamic_prompt(time_per_week, learning_need, deadline,format_instructions):
-    return f"""
-You are an AI mentor. You MUST output ONLY valid JSON.
-No explanation, no markdown, no ```json blocks, no commentary.
-
-Your task: create a structured SMART-goal weekly learning plan.
+def get_roadmap_system_prompt():
+    return """
+You are an expert AI Learning Architect. Your goal is to design a high-quality, personalized learning roadmap.
+You MUST output ONLY valid JSON.
 
 === USER CONTEXT ===
-Weekly available time: {time_per_week}
-Learning goal: {learning_need}
-Deadline: {deadline}
+- Weekly available time: {time_per_week} hours
+- Specific learning need: {learning_need}
+- Desired timeframe: {deadline} weeks
+{user_context}
+
+=== STRATEGY ===
+- Create a logical, progressive path from fundamentals to advanced concepts.
+- Ensure the workload is realistic for the {time_per_week} hours available per week.
+- Adapt the depth and complexity based on the user's background and skills.
 
 === REQUIRED BEHAVIOR ===
-- Break the plan logically by week
-- Do NOT include success metrics or extra fields
-- Missing information? Still output JSON matching schema
-- Output *pure JSON only*
+- Break the plan logically by week.
+- For each week, provide a clear, actionable 'goal'.
+- Output *pure JSON only* matching the schema below.
+- No markdown, no commentary.
 
-=== JSON FORMAT YOU MUST FOLLOW ===
+=== JSON FORMAT ===
 {format_instructions}
-
-Now answer using ONLY JSON.
 """
 
 roadmap_prompt = ChatPromptTemplate.from_messages([
-    ("system", build_dynamic_prompt("{time_per_week}", "{learning_need}", "{deadline}","{format_instructions}")),
+    ("system", get_roadmap_system_prompt()),
     ("human", "{input}")
 ])

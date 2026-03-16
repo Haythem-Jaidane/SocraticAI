@@ -6,28 +6,43 @@ import pandas as pd
 import plotly.express as px
 import logging
 import json
+from typing import List, TypedDict, Any, Optional
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)    
 
+class UserInfo(TypedDict):
+    skills: str
+    goal: str
+    occupation: str
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
 from src.agent.roadmap_builder import generate_learning_plan, ContactInfo
+from src.database.roadmap import add_roadmap
+from src.database.database_qu import get_user_data
+import inspect
+import src.agent.roadmap_builder
 
 st.set_page_config(page_title="Roadmap Builder", page_icon="🗺️")
 
 st.sidebar.page_link('pages/1_Dashboard.py', label='Dashboard')
 st.sidebar.page_link('pages/2_Teacher.py', label='Teacher')
 st.sidebar.page_link('pages/3_Roadmap.py', label='Roadmap Builder')
-st.sidebar.page_link('pages/Quiz.py', label='Quiz')
-st.sidebar.page_link('pages/News.py', label='News')
+st.sidebar.page_link('pages/5_Quiz.py', label='Quick Quiz')
+st.sidebar.page_link('pages/Assesement.py', label='Full Assessment')
+st.sidebar.page_link('pages/4_News.py', label='News')
+
 
 if 'user' not in st.session_state or not st.session_state.user:
     st.switch_page("app.py")
 
 st.title("🗺️ Generate Learning Roadmap")
 
-subject = st.text_input("What subject do you want to learn?", key="rm_subject")
+uid = st.session_state.user.get("localId")
+user_profile = get_user_data(uid)
+
+subject = user_profile.get("goal", "")
 duration = st.time_input("How much time do you have to learn daily?", key="rm_duration")
 deadline = st.number_input("Total weeks of learning", min_value=4, max_value=12, key="rm_deadline")
 prompt = st.text_area("Any specific focus areas or requirements?", key="rm_prompt")
@@ -42,17 +57,30 @@ if st.button("Generate My Roadmap", type="primary"):
     
     # --- UI Scaffolding: Caching & Loading State ---
     with st.status("🧠 Consulting Senior AI Developer...", expanded=True) as status:
-        st.write("🔍 Analyzing your learning parameters...")
-        st.write("🔎 Structuring educational path...")
-        st.write("✨ Synthesizing personalized roadmap...")
         
         # Real generation
         try:
-            response = generate_learning_plan(contact=contact_info)
+            # Fetch user profile for personalization
+            uid = st.session_state.user.get("localId")
+            user_profile = get_user_data(uid)
+            
+            user_info = None
+            if user_profile:
+                user_info = {
+                    "skills": str(user_profile.get("skills", [])),
+                    "goal": user_profile.get("goal", ""),
+                    "occupation": user_profile.get("occupation", "")
+                }
+
+            response = generate_learning_plan(contact=contact_info, user_info=user_info)
             logging.info(response)
             plan_data = response
             st.session_state.current_roadmap = plan_data["plan"]
             st.session_state.current_roadmap_subject = subject
+            
+            # Save to database
+            add_roadmap(uid, plan_data)
+            
             status.update(label="Roadmap Generated! 🚀", state="complete", expanded=False)
         except Exception as e:
             status.update(label="Failed to generate roadmap.", state="error", expanded=False)
@@ -73,7 +101,7 @@ if "current_roadmap" in st.session_state:
     roadmap_items = []
     
     for week in weeks:
-        week_num = week.get("week_number", 1)
+        week_num = week.get("week", 1)
         if week_num <= 25:
             category = "Foundation"
             color = "rgba(79, 70, 229, 0.2)"
@@ -97,7 +125,7 @@ if "current_roadmap" in st.session_state:
 
         roadmap_items.append({
             "week": f"Week {week_num}",
-            "goal": week.get("specific", ""),
+            "goal": week.get("goal", ""),
             "category": category,
             "color": color,
             "borderColor": border_color
